@@ -5,9 +5,9 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get()
-  updateRepo(){
-    return this.appService.updateRepo();
+  @Get(":name")
+  updateRepo(name: string){
+    return this.appService.updateRepo(name);
   }
   
 }

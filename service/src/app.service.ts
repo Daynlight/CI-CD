@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as path from 'path';
 import { exec } from 'child_process';
+import * as fs from 'fs';
 
 
 function execute(command: string, path: string){
@@ -21,8 +22,13 @@ function execute(command: string, path: string){
 
 @Injectable()
 export class AppService {
-  updateRepo() {
-    let repoPath = path.join(__dirname + "/../../repo/");
+  updateRepo(name: string) {
+    let repoPath = path.join(__dirname + "/../../repos/" + name + "/");
+
+    if(!fs.existsSync(repoPath))
+      return { Status: "Service didn't exists" };
+    
     return execute("git pull -f", repoPath);
+    // return execute("", repoPath);
   };
 };
