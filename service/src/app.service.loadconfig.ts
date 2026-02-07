@@ -54,7 +54,7 @@ const configTemplate = `[
 
 @Injectable()
 export class StartupService implements OnModuleInit {
-  private static services: ServiceInfo[] = [];
+  public static services: ServiceInfo[] = [];
   private static file : string = "/etc/ci-cd-service/services.json";
   private watcher: fs.FSWatcher | null = null;
 

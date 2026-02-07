@@ -1,13 +1,16 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { AppService } from './app.service';
 
 @Controller('api/service')
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get(":name")
-  updateRepo(name: string){
-    return this.appService.updateRepo(name);
+  @Get(":username/:repo_name")
+  updateRepo(
+    @Param('username') username: string,
+    @Param('repo_name') repo_name: string,
+  ){
+    return this.appService.updateRepo(username, repo_name);
   }
   
 }
