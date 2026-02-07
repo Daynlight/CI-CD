@@ -12,10 +12,21 @@ function execute(command: string, options){
   try {
     const output = execSync(command, options).toString();
     console.log(`Output: ${output}`);
-    return { Status: "Success" };
+    return { Status: output };
   } catch (error: any) {
     console.error(`Error: ${error.message}`);
     return { Status: error.message };
+  }
+}
+
+function executeHidden(command: string, options){
+  try {
+    const output = execSync(command, options).toString();
+    console.log(`Output: ${output}`);
+    return { Status: "Success" };
+  } catch (error: any) {
+    console.error(`Error: ${error.message}`);
+    return { Status: "Error" };
   }
 }
 
@@ -42,29 +53,33 @@ export class AppService {
 
         let res_pull: string = "";
         let res_start: string = "";
-        
+        let res_status: string = "";
+        let res_stop: string = "";
+
         // Stop
-        if(service.stop != null)
-          execute(service.stop, { cwd: service.dir });
+        if(service.status != null)
+          res_status = executeHidden(service.status, { cwd: service.dir }).Status;
+        if(res_status == "running" && service.stop != null)
+          executeHidden(service.stop, { cwd: service.dir });
         
         // Update
-        res_pull = execute("git pull -f", { cwd: service.dir }).Status;
+        res_pull = executeHidden("git pull -f", { cwd: service.dir }).Status;
         
         // Rerun
         if(service.start != null)
-          res_start = execute(service.start, { cwd: service.dir }).Status;
-
+          res_start = executeHidden(service.start, { cwd: service.dir }).Status;
+        if(service.status != null)
+          res_status = executeHidden(service.status, { cwd: service.dir }).Status;
+        
         // Validate
-        if(res_pull == "Success" && res_start == "Success")
+        if(res_pull == "Success" && res_status == "Success")
           passed += 1;
-        else
-          list.push("Error on pull or start");
       }
     };
 
     if(total == passed)
       return { "Status": "Success" };
     else
-      return list;
+      return { "Status": "Error" };
   };
 };
