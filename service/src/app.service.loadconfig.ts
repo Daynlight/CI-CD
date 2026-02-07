@@ -32,7 +32,7 @@ const configTemplate = `[
   //   "repo_url": "https://github.com/owner_name/repo_name.git",
   //   "repo_name": "owner_name/repo_name",
   //   "branch": "branch_name",
-  //   "path": "path/to/service/with/repo",
+  //   "dir": "path/to/service/with/repo",
   //   "sign": "path/to/signature",
   //   "start": "start command",
   //   "status": "start command",
@@ -85,6 +85,7 @@ export class StartupService implements OnModuleInit {
   private validateServices(){
     for (const service of StartupService.services) {
       if (!service.dir) continue;
+      console.log("service");
 
       if (!fs.existsSync(service.dir)) {
         console.warn(`Config file not found. Creating empty config at ${service.dir}`);
@@ -105,7 +106,7 @@ export class StartupService implements OnModuleInit {
             .toString()
             .trim();
 
-          if (remoteUrl !== service.repo_url) {
+          if (remoteUrl != service.repo_url) {
             console.error(`Existing repo in ${service.dir} has a different remote: ${remoteUrl}`);
             continue;
           }
