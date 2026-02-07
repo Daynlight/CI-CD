@@ -11,18 +11,14 @@ import { execSync } from 'child_process';
 
 
 interface ServiceInfo {
+  repo_url: string | null;
   repo_name: string | null;
+  branch: string | null;
   dir: string | null;
   sign: string | null;
   start: string | null;
+  status: string | null;
   stop: string | null;
-};
-
-interface RepoInfo {
-  name: string | null;
-  branch: string | null;
-  commit: string | null;
-  path: string;
 };
 
 
@@ -33,11 +29,14 @@ interface RepoInfo {
 
 const configTemplate = `[
   // {
+  //   "repo_url": "https://github.com/owner_name/repo_name.git",
   //   "repo_name": "owner_name/repo_name",
+  //   "branch": "branch_name",
   //   "path": "path/to/service/with/repo",
   //   "sign": "path/to/signature",
-  //   "start": "path/to/start/script",
-  //   "stop": "path/to/stop/script"
+  //   "start": "start command",
+  //   "status": "start command",
+  //   "stop": "stop command"
   // },
 ]`;
 
@@ -55,7 +54,6 @@ const configTemplate = `[
 
 @Injectable()
 export class StartupService implements OnModuleInit {
-  private static repos: RepoInfo[] = [];
   private static services: ServiceInfo[] = [];
   private static file : string = "/etc/ci-cd-service/services.json";
   private watcher: fs.FSWatcher | null = null;
@@ -84,33 +82,77 @@ export class StartupService implements OnModuleInit {
 
 
 
-
-  private loadReposFromServices(){
-    const repos: RepoInfo[] = [];
-
+  private validateServices(){
     for (const service of StartupService.services) {
       if (!service.dir) continue;
 
+      if (!fs.existsSync(service.dir)) {
+        console.warn(`Config file not found. Creating empty config at ${service.dir}`);
+        const dir = path.dirname(service.dir);
+        fs.mkdirSync(dir, { recursive: true });
+      };
+
       try {
-        const repoPath = service.dir;
+        if (!fs.existsSync(path.join(service.dir + "/.git/"))) {
+          if (!service.repo_url) {
+            console.error(`No repo URL provided for ${service.dir}`);
+            continue;
+          }
+          console.log(`Cloning repo ${service.repo_url} into ${service.dir}`);
+          execSync(`git clone ${service.repo_url} ${service.dir}`, { stdio: 'inherit' });
+        } else {
+          const remoteUrl = execSync('git config --get remote.origin.url', { cwd: service.dir })
+            .toString()
+            .trim();
 
-        let name = service.repo_name;
+          if (remoteUrl !== service.repo_url) {
+            console.error(`Existing repo in ${service.dir} has a different remote: ${remoteUrl}`);
+            continue;
+          }
+        }
 
-        const branch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: repoPath })
+        const currentBranch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: service.dir })
           .toString()
           .trim();
-        
-        const commit = execSync('git rev-parse HEAD', { cwd: repoPath })
-          .toString()
-          .trim();
-        
-        repos.push({ name, branch, commit, path: repoPath });
+
+        if (currentBranch !== service.branch) {
+          const currentBranch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: service.dir })
+            .toString()
+            .trim();
+
+          if (currentBranch != service.branch) {
+            console.log(`Switching ${currentBranch} to branch ${service.branch}`);
+            execSync(`git checkout ${service.branch}`, { cwd: service.dir, stdio: 'inherit' });
+          } else {
+            console.error(`Branch ${service.branch} does not exist in ${service.dir}`);
+          }
+        };
       } catch (err) {
-        console.error(`Failed to load repo info for ${service.dir}:`, err.message);
-      }
-    }
+        console.error(`Error validating service at ${service.dir}:`, err.message);
+      };
+    };
+  };
 
-    return repos;
+
+
+  private runServices(){
+    for (const service of StartupService.services) {
+      if (!service.dir) continue;
+      try {
+        if(service.status != null && service.start != null){
+          const status = execSync(service.status, { cwd: service.dir })
+            .toString()
+            .trim();
+
+          if(status != 'running')
+            console.log(execSync(service.start, { cwd: service.dir })
+              .toString()
+              .trim());
+        }
+      } catch (err) {
+        console.error(`Error validating service at ${service.dir}:`, err.message);
+      };
+    };
   };
 
 
@@ -132,10 +174,10 @@ export class StartupService implements OnModuleInit {
 
   private loadData(file: string){
     StartupService.services = this.loadConfFile(file);
-    StartupService.repos = this.loadReposFromServices();
+    this.validateServices();
+    this.runServices();
 
     console.log(StartupService.services);
-    console.log(StartupService.repos);
   };
 
 
