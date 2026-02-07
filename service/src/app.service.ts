@@ -8,17 +8,6 @@ import { StartupService } from './app.service.loadconfig';
 
 
 
-function execute(command: string, options){
-  try {
-    const output = execSync(command, options).toString();
-    console.log(`Output: ${output}`);
-    return { Status: output };
-  } catch (error: any) {
-    console.error(`Error: ${error.message}`);
-    return { Status: error.message };
-  }
-}
-
 function executeHidden(command: string, options){
   try {
     const output = execSync(command, options).toString();
