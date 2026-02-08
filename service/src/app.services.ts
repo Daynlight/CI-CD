@@ -248,6 +248,10 @@ export class RepoServices implements OnModuleInit {
   ////////////////  api   ////////////////
   //////////////////////////////////////// 
   private verifySignature(pathToPubKey: string, sig_body: string, body: string){
+    const timestamp = parseInt(body);
+    const now = Math.floor(Date.now() / 1000);
+    if (Math.abs(now - timestamp) > 60) return false;
+
     const publicKey = fs.readFileSync(pathToPubKey, 'utf-8');
 
     const canonical = `GET\n${body}\n-`;
