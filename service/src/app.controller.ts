@@ -1,5 +1,6 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Headers } from '@nestjs/common';
 import { AppService } from './app.service';
+
 
 @Controller('api/service')
 export class AppController {
@@ -9,8 +10,12 @@ export class AppController {
   updateRepo(
     @Param('username') username: string,
     @Param('repo_name') repo_name: string,
+    @Headers('x-signature') signature: string,
+    @Headers('x-timestamp') timestamp: string
   ){
-    return this.appService.updateRepo(username, repo_name);
+    console.log('Original Timestamp:', timestamp);
+    
+    return this.appService.updateRepo(username, repo_name, signature, timestamp);
   }
   
 }

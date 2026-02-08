@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { execSync } from 'child_process';
 import { StartupService } from './app.service.loadconfig'; 
+
+import { execSync } from 'child_process';
+import * as crypto from 'crypto';
+import * as fs from 'fs';
 
 
 
@@ -45,6 +48,18 @@ function updateService(service){
     return 0;
 }
 
+function verifySignature(pathToPubKey: string, signature: string, timestamp: string){
+  const publicKey = fs.readFileSync(pathToPubKey, 'utf-8');
+
+  const canonical = `GET\n${timestamp}\n-`;
+
+  const verify = crypto.createVerify('RSA-SHA256');
+  verify.update(canonical);
+  verify.end();
+
+  return verify.verify(publicKey, signature, 'base64');
+};
+
 
 
 
@@ -53,19 +68,25 @@ function updateService(service){
 
 @Injectable()
 export class AppService {
-  updateRepo(username: string, repo_name: string) {
+  updateRepo(username: string, repo_name: string, signature: string, timestamp: string) {
     const services = StartupService.services.filter(
       s => s.repo_name === `${username}/${repo_name}`
     );
 
     let total = 0;
     let passed = 0;
-    let list: string[] = [];
 
     for (const service of services) {
       if(service.dir != null){
         total += 1;
-        passed += updateService(service);
+
+        if(service.sign != null)
+          if(verifySignature(service.sign, signature, timestamp))
+            passed += updateService(service);
+          else
+            console.error("Invalid Signature");
+        else
+          console.error("No signature");
       }
     };
 
