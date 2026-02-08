@@ -1,9 +1,8 @@
-import { NestApplication, NestFactory } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 import * as path from 'path';
 import * as fs from 'fs';
-import { NestApplicationOptions } from '@nestjs/common';
 
 
 
@@ -19,8 +18,9 @@ async function bootstrap() {
       cert: fs.readFileSync(path.join(__dirname, '..', 'settings', 'server.crt')),
     };
   }
-  catch(err){
-    console.warn(err);
+  catch(err) {
+    console.error('Failed to run HTTPS: ', err);
+    process.exit(1);
   };
 
   const app = await NestFactory.create(AppModule, { httpsOptions });

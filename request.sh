@@ -25,6 +25,6 @@ SIGNATURE=$(printf "$CANONICAL" \
 curl -v -k \
   -H "X-Username: $USERNAME" \
   -H "X-Repo: $REPO" \
-  -H "X-Timestamp: $TIMESTAMP" \
-  -H "X-Signature: $SIGNATURE" \
+  -H "X-Body: $TIMESTAMP" \
+  -H "X-Sig-body: $SIGNATURE" \
   "$URL"

@@ -15,9 +15,9 @@ export class AppController {
   updateRepo(
     @Headers('x-username') username: string,
     @Headers('x-repo') repo: string,
-    @Headers('x-signature') signature: string,
-    @Headers('x-timestamp') timestamp: string
+    @Headers('x-sig-body') sig_body: string,
+    @Headers('x-body') body: string
   ){
-    return this.appRepoService.apiUpdate(username, repo, signature, timestamp);
+    return this.appRepoService.apiUpdate(username, repo, sig_body, body);
   }
 }
