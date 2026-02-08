@@ -1,8 +1,10 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import * as path from 'path';
-import * as fs from 'fs';
+
 import { parse } from 'jsonc-parser';
 import { execSync } from 'child_process';
+import * as crypto from 'crypto';
+import * as path from 'path';
+import * as fs from 'fs';
 
 
 
@@ -33,7 +35,7 @@ const configTemplate = `[
   //   "repo_name": "owner_name/repo_name",
   //   "branch": "branch_name",
   //   "dir": "path/to/service/with/repo",
-  //   "sign": "path/to/signature",
+  //   "sign": "path/to/public.key",
   //   "start": "start command",
   //   "status": "start command",
   //   "stop": "stop command"
@@ -53,9 +55,9 @@ const configTemplate = `[
 
 
 @Injectable()
-export class StartupService implements OnModuleInit {
-  public static services: ServiceInfo[] = [];
+export class RepoServices implements OnModuleInit {
   private static file : string = "/etc/ci-cd-service/services.json";
+  public static services: ServiceInfo[] = [];
   private watcher: fs.FSWatcher | null = null;
 
 
@@ -64,6 +66,9 @@ export class StartupService implements OnModuleInit {
 
 
 
+  ////////////////////////////////////////
+  //////////////// startup ////////////////
+  ////////////////////////////////////////
   private loadConfFile(file: string){
     console.log(`Load config data from ${file}`);
 
@@ -83,7 +88,7 @@ export class StartupService implements OnModuleInit {
 
 
   private validateServices(){
-    for (const service of StartupService.services) {
+    for (const service of RepoServices.services) {
       if (!service.dir) continue;
       console.log("service");
 
@@ -137,7 +142,7 @@ export class StartupService implements OnModuleInit {
 
 
   private runServices(){
-    for (const service of StartupService.services) {
+    for (const service of RepoServices.services) {
       if (!service.dir) continue;
       try {
         if(service.status != null && service.start != null){
@@ -163,7 +168,7 @@ export class StartupService implements OnModuleInit {
       if (eventType === 'change') {
         try {
           console.log(`Config file changed. Reloading...`);
-          this.loadData(StartupService.file);
+          this.loadData(RepoServices.file);
         } catch (err) {
           console.error('Failed to reload config file:', err);
         }
@@ -174,11 +179,11 @@ export class StartupService implements OnModuleInit {
 
 
   private loadData(file: string){
-    StartupService.services = this.loadConfFile(file);
+    RepoServices.services = this.loadConfFile(file);
     this.validateServices();
     this.runServices();
 
-    console.log(StartupService.services);
+    console.log(RepoServices.services);
   };
 
 
@@ -190,13 +195,111 @@ export class StartupService implements OnModuleInit {
   onModuleInit() {
     console.log('StartupService initialized');
 
-    this.loadData(StartupService.file);
-    this.watchForChanges(StartupService.file);
-    
-    this.runOnStartup();
-  }
+    this.loadData(RepoServices.file);
+    this.watchForChanges(RepoServices.file);
+  };
 
-  runOnStartup() {
-    console.log('StartupService startup logic...');
-  }
-}
+
+
+
+
+
+
+
+
+
+
+
+
+  ////////////////////////////////////////
+  ////////////////  api   ////////////////
+  //////////////////////////////////////// 
+  private verifySignature(pathToPubKey: string, signature: string, timestamp: string){
+    const publicKey = fs.readFileSync(pathToPubKey, 'utf-8');
+
+    const canonical = `GET\n${timestamp}\n-`;
+
+    const verify = crypto.createVerify('RSA-SHA256');
+    verify.update(canonical);
+    verify.end();
+
+    return verify.verify(publicKey, signature, 'base64');
+  };
+
+
+  private updateService(service: ServiceInfo){
+    let res_pull: Number = 0;
+    let res_status: Number = 0;
+
+    // Stop
+    if(service.status != null)
+      res_status = this.executeHidden(service.status, { cwd: service.dir });
+    if(res_status && service.stop != null)
+      this.executeHidden(service.stop, { cwd: service.dir });
+    
+    // Update
+    res_pull = this.executeHidden("git pull -f", { cwd: service.dir });
+    
+    // Rerun
+    if(service.start != null)
+      this.executeHidden(service.start, { cwd: service.dir });
+    if(service.status != null)
+      res_status = this.executeHidden(service.status, { cwd: service.dir });
+    
+    // Validate
+    if(res_pull || res_status)
+      return 0;
+    else
+      return 1;
+  };
+
+
+
+  private executeHidden(command: string, options){
+    try {
+      const output = execSync(command, options).toString();
+      console.log(`Output: ${output}`);
+      return 0;
+    } catch (error: any) {
+      console.error(`Error: ${error.message}`);
+      return -1;
+    }
+  };
+
+
+
+
+
+
+
+  apiUpdate(username: string, repo_name: string, signature: string, timestamp: string) {
+    const services = RepoServices.services.filter(
+      s => s.repo_name === `${username}/${repo_name}`
+    );
+
+    let total = 0;
+    let list: string[] = [];
+
+    for (const service of services) {
+      if(service.dir != null){
+        total += 1;
+
+        if(service.sign != null)
+          if(this.verifySignature(service.sign, signature, timestamp)){
+            if(this.updateService(service))
+              list.push(`${total}: Successfully Updated`);
+            else
+              list.push(`${total}: Error when updating`);
+          }
+          else
+            list.push(`${total}: Request doesn't pass Signature Verification`);
+        else
+          list.push("Invalid sign path");
+      }
+      else
+        list.push("Invalid dir is null");
+    };
+    
+    return list;
+  };
+};

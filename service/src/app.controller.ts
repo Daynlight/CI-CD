@@ -1,21 +1,23 @@
-import { Controller, Get, Param, Headers } from '@nestjs/common';
-import { AppService } from './app.service';
+import { Controller, Get, Headers } from '@nestjs/common';
+import { RepoServices } from './app.services';
+
+
+
+
+
 
 
 @Controller('api/service')
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly appRepoService: RepoServices) {}
 
-  @Get(":username/:repo_name")
+  @Get()
   updateRepo(
-    @Param('username') username: string,
-    @Param('repo_name') repo_name: string,
+    @Headers('x-username') username: string,
+    @Headers('x-repo') repo: string,
     @Headers('x-signature') signature: string,
     @Headers('x-timestamp') timestamp: string
   ){
-    console.log('Original Timestamp:', timestamp);
-    
-    return this.appService.updateRepo(username, repo_name, signature, timestamp);
+    return this.appRepoService.apiUpdate(username, repo, signature, timestamp);
   }
-  
 }
