@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
-PRIVATE_KEY="private.pem"
-URL="http://127.0.0.1:3000/api/service/Daynlight/Big-data-server"
 METHOD="GET"
+PRIVATE_KEY="private.pem"
+URL="https://127.0.0.1:3000/api/service/"
+
+USERNAME="Daynlight"
+REPO="Big-data-server"
 
 # unix timestamp
 TIMESTAMP=$(date +%s)
@@ -19,7 +22,9 @@ SIGNATURE=$(printf "$CANONICAL" \
   | base64 -w 0)
 
 # send request
-curl -v \
-  -H "X-Timestamp: $TIMESTAMP" \
-  -H "X-Signature: $SIGNATURE" \
+curl -v -k \
+  -H "X-Username: $USERNAME" \
+  -H "X-Repo: $REPO" \
+  -H "X-Body: $TIMESTAMP" \
+  -H "X-Sig-body: $SIGNATURE" \
   "$URL"
