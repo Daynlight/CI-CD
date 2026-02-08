@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 
 import { parse } from 'jsonc-parser';
-import { execSync, ExecSyncOptionsWithStringEncoding } from 'child_process';
+import { execSync } from 'child_process';
 import * as crypto from 'crypto';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -268,6 +268,24 @@ export class RepoServices implements OnModuleInit {
   private updateService(service: ServiceInfo){
     let res_pull: Number = 0;
     let res_status: Number = 0;
+
+    // check commits
+    if(service.dir != null){
+      const localCommit = execSync('git rev-parse HEAD', { cwd: service.dir })
+        .toString()
+        .trim();
+      execSync('git fetch', { cwd: service.dir, stdio: 'ignore' });
+      const remoteCommit = execSync(`git rev-parse origin/${service.branch}`, { cwd: service.dir })
+        .toString()
+        .trim();
+      
+      if(localCommit === remoteCommit)
+        return true;
+    }
+    else{
+      console.warn(`${service.name}: Invalid directory ${service.dir}`);
+      return false;
+    };
 
     // Stop
     if(service.status != null)
