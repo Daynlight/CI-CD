@@ -11,21 +11,15 @@ import * as fs from 'fs';
 
 
 async function bootstrap() {
-  let httpsOptions;
-  try{
-    httpsOptions = {
-      key: fs.readFileSync(path.join(__dirname, '..', 'settings', 'server.key')),
-      cert: fs.readFileSync(path.join(__dirname, '..', 'settings', 'server.crt')),
-    };
-  }
-  catch(err) {
-    console.error('Failed to run HTTPS: ', err);
-    process.exit(1);
-  };
+  const app = await NestFactory.create(AppModule);
 
-  const app = await NestFactory.create(AppModule, { httpsOptions });
-  await app.listen(process.env.PORT ?? 3000);
+  console.log(`HTTPS server running on http://localhost:${process.env.PORT ?? 3000}`);
 
-  console.log(`HTTPS server running on https://localhost:${process.env.PORT ?? 3000}`);
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  });
+
+  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
 }
 bootstrap();
