@@ -1,5 +1,13 @@
 import { Controller, Get, Headers } from '@nestjs/common';
-import { RepoServices } from './app.services';
+import { ApiServices } from './app.api';
+
+
+
+
+
+
+
+
 
 
 
@@ -9,7 +17,14 @@ import { RepoServices } from './app.services';
 
 @Controller('api/service')
 export class AppController {
-  constructor(private readonly appRepoService: RepoServices) {}
+  constructor(private readonly apiService: ApiServices) {}
+
+
+
+
+
+
+
 
   @Get()
   updateRepo(
@@ -18,6 +33,6 @@ export class AppController {
     @Headers('x-sig-body') sig_body: string,
     @Headers('x-body') body: string
   ){
-    return this.appRepoService.apiUpdate(username, repo, sig_body, body);
-  }
-}
+    return this.apiService.api(username, repo, sig_body, body);
+  };
+};

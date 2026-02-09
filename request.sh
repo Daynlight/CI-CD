@@ -2,7 +2,7 @@
 
 METHOD="GET"
 PRIVATE_KEY="private.pem"
-URL="https://127.0.0.1:3000/api/service/"
+URL="http://127.0.0.1:3000/api/service/"
 
 USERNAME="Daynlight"
 REPO="Big-data-server"

@@ -1,7 +1,17 @@
 import { Module } from '@nestjs/common';
 
 import { AppController } from './app.controller';
-import { RepoServices } from './app.services';
+import { ApiServices } from './app.api';
+import { ServiceController } from './app.service.controller';
+import { ConfigController } from './app.config.controller';
+
+
+
+
+
+
+
+
 
 
 
@@ -12,6 +22,7 @@ import { RepoServices } from './app.services';
 @Module({
   imports: [],
   controllers: [AppController],
-  providers: [RepoServices],
+  providers: [ApiServices, ConfigController, ServiceController],
+  exports: [ConfigController, ServiceController]
 })
 export class AppModule {}
