@@ -58,7 +58,7 @@ const configTemplate = `[
 export class ConfigController {
   private watcher: fs.FSWatcher | null = null;
   private services: ServiceInfo[] = [];
-  private static file : string = "/etc/ci-cd-service/services.json";
+  private static file : string = "/etc/ci-cd-config/services.json";
 
 
 
