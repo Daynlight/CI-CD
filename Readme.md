@@ -1,11 +1,11 @@
 TODO:
 - [ ] Docs
-- [ ] Tests
-- [ ] Edge cases
-- [ ] Releases
 - [ ] Github
-- [ ] Actions Template
+- [ ] Tests
 - [ ] Branches
+- [ ] Releases
+- [ ] Edge cases
+- [ ] Actions Template
 - [ ] Review
-- [ ] Spread Servers
 - [x] License
+- [ ] Spread Servers
