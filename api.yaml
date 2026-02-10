@@ -18,6 +18,8 @@ on:
   push:
     branches:
       - main # [!REQUIRED][set your production branch]
+  
+  workflow_dispatch:
 
   ### --------------------
   ### - Specify workflows that have to run and end with success before 
