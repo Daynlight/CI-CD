@@ -1,23 +1,46 @@
+# Copyright (c) 2026 Daniel Stodulski
+# SPDX-License-Identifier: MIT
+# See the LICENSE file in the project root for license information.
+
+
+
 name: CI-CD-API
+
+
+
+env:
+  URL: # [!REQUIRED][set endpoint for api]
+# [!REQUIRED][set secret PRIVATE_KEY with your signature private key]
+
+
 
 on:
   push:
     branches:
-      - main # [set your production branch]
+      - main # [!REQUIRED][set your production branch]
 
-env:
-  USERNAME:  # [set repository owner username]
-  REPO:  # [set repository name]
-  URL:  # [set endpoint for api]
+  ### --------------------
+  ### - Specify workflows that have to run and end with success before 
+  ### - sending request, also uncomment lines
+  ### - for example: Tests
+  ### --------------------
+  # workflow_run:
+  # types: ["Tests"] # [Set your others workflows]
+  #   - completed
+
+
 
 jobs:
   ci-cd-api:
+    if: ${{ github.event_name != 'workflow_run' || 
+            github.event.workflow_run.conclusion == 'success' }}
+
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up private key # [set secret with your private key]
+      - name: Set up private key
         run: |
           echo "${{ secrets.PRIVATE_KEY }}" > private.pem
           chmod 600 private.pem
@@ -41,8 +64,8 @@ jobs:
       - name: Send request
         run: |
           curl -v -k \
-            -H "X-Username: $USERNAME" \
-            -H "X-Repo: $REPO" \
+            -H "X-Username: ${{ github.repository_owner }}" \
+            -H "X-Repo: ${{ github.event.repository.name }}" \
             -H "X-Body: $TIMESTAMP" \
             -H "X-Sig-body: $SIGNATURE" \
             "$URL"
