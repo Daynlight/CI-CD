@@ -8,34 +8,32 @@
 ## About
 **CI-CD** is a ```GitHub-based continuous integration and deployment workflow``` that allows you to **automatically deploy** your **applications on server**. It contain two modules:  
 
-1. **CI-CD-Server**: ```NestJS server backend on Server```.  
-2. **CI-CD-Service**: ```GitHub Repo with workflow```.
+1. **Server**: ```NestJS server backend on Server```.  
+2. **Service**: ```GitHub Repo with workflow```.
 
 
 
 ## TOC
 - [About](#about)
 - [TOC](#toc)
-- [Server Installation](#server-installation)
-- [Server Uninstallation](#server-uninstallation)
+- [Server Setup](#server-setup)
+  - [Server Installation](#server-installation)
+  - [Server Uninstallation](#server-uninstallation)
 - [Usage](#usage)
-  - [CI-CD-Server](#ci-cd-server)
-  - [CI-CD-Service](#ci-cd-service)
+  - [Repo](#repo)
+  - [Server](#server)
+    - [example:](#example)
 - [Security](#security)
 - [Prerequisites](#prerequisites)
-  - [CI-CD-Server](#ci-cd-server-1)
-  - [CI-CD-Service](#ci-cd-service-1)
-- [Architecture](#architecture)
-  - [CI-CD-Server](#ci-cd-server-2)
-  - [CI-CD-Service](#ci-cd-service-2)
+  - [Server](#server-1)
 - [Used in:](#used-in)
 - [LICENSE](#license)
-- [TODO:](#todo)
 - [Kitty](#kitty)
 
 
 
-## Server Installation
+## Server Setup
+### Server Installation
 ```bash
 ### ----------------------------------
 ### Settings directories and ownership
@@ -103,7 +101,7 @@ sudo systemctl start ci-cd.service
 sudo journalctl -u ci-cd -f
 ```
 
-## Server Uninstallation
+### Server Uninstallation
 ```bash
 ### ----------------------
 ### Stop and disable service
@@ -127,36 +125,86 @@ sudo rm -rf /etc/ci-cd/CI-CD
 
 
 ## Usage
-### CI-CD-Server
-### CI-CD-Service
+### Repo
+1. Create **github repo**.
+2. Provide ```Public.key``` for Servers.
+3. **[Optionally]** provide **start.sh**, **status.sh**, **stop.sh** scripts.
+4. Set github action with [api.yaml](https://github.com/Daynlight/CI-CD/blob/api_action/api.yaml)
+   1. Update **URL** to your endpoint.
+   2. Add **secret PRIVATE_KEY** for **signature** in github settings.
+   3. **[Optionally]** Set waiting for other workflows.
+
+### Server
+To **setup server** you have to **edit**: ```/etc/ci-cd-config/services.json```
+```json
+[
+  {
+    "name": "service_name",
+    "repo_url": "https://github.com/owner_name/repo_name.git",
+    "repo_name": "owner_name/repo_name",
+    "branch": "branch_name",
+    "dir": "path/to/service/with/repo",
+    "sign": "path/to/public.key",
+    "start": "start command",
+    "status": "start command",
+    "stop": "stop command"
+  },
+]
+```
+
+#### example:
+```json
+[
+  {
+    "name": "Big-data-service",
+    "repo_url": "https://github.com/Daynlight/Big-data-server.git",
+    "repo_name": "Daynlight/Big-data-server",
+    "branch": "main",
+    "dir": "/etc/ci-cd/services/Big-data-server/",
+    "sign": "/etc/ci-cd/services/Big-data-server/public.key", // or other location
+    "start": "/etc/ci-cd/services/Big-data-server/start.sh",  // or other bash command
+    "status": "/etc/ci-cd/services/Big-data-server/status.sh",// or other bash command
+    "stop": "/etc/ci-cd/services/Big-data-server/stop.sh"     // or other bash command
+  },
+]
+```
+Server after **file change automatically detect changes** than :
+- **clone if doesn't exist**
+- **change branch** 
+- **start from command if not running**
+
 
 
 ## Security
+- It uses **keys pair** for ```encryption and decryption```. Server have access only to ```public.key``` and ```private.key``` is stored as **secret in repo**. 
+- When **API is called** than workflow create ```private.pem``` on **vm** and **send request** after that **vm is destroyed** so ```private.key``` is safe. 
+- **[!! Warning !!]**: take care about **not committing** and **printing** ```private.key``` in workflow.
+- Server works on **http** to use **https** edit ```src/main.ts``` and add **cert** and **key**.
+- **Ideal scenario** is using ```cloudflare``` for **tunneling** and **request isolation**.
+- On server before **restarting** and **updating** we check **last commit** and **current commit**.
+
 
 
 ## Prerequisites
-### CI-CD-Server
-### CI-CD-Service
-
-
-
-## Architecture
-### CI-CD-Server
-### CI-CD-Service
+### Server
+  - **openssl**
+  - **network**
+  - **git**
+  - **nodejs**
+  - **npm**
+  - **jsonc-parser**
+  - other programs need for running **for example docker**
 
 
 
 ## Used in:
+- [Big-data-server](https://github.com/Daynlight/Big-data-server)
 
 
 
 ## LICENSE
+[LICENSE](LICENSE)
 
-
-
-## TODO:
-- [ ] npm install for server
-- [ ] release
 
 
 ## Kitty
