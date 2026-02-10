@@ -1,3 +1,8 @@
+// Copyright (c) 2026 Daniel Stodulski
+// SPDX-License-Identifier: MIT
+// See the LICENSE file in the project root for license information.
+
+
 import { Controller, Get, Headers } from '@nestjs/common';
 import { ApiServices } from './app.api';
 

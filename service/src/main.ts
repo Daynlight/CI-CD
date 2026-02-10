@@ -1,3 +1,8 @@
+// Copyright (c) 2026 Daniel Stodulski
+// SPDX-License-Identifier: MIT
+// See the LICENSE file in the project root for license information.
+
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 

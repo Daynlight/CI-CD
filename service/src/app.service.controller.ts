@@ -1,3 +1,8 @@
+// Copyright (c) 2026 Daniel Stodulski
+// SPDX-License-Identifier: MIT
+// See the LICENSE file in the project root for license information.
+
+
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 
 import * as path from 'path';
@@ -23,6 +28,14 @@ import { ConfigController } from './app.config.controller';
 
 @Injectable()
 export class ServiceController {
+
+
+
+
+
+
+
+
   constructor(
     @Inject(forwardRef(() => ConfigController))
     private readonly configController: ConfigController

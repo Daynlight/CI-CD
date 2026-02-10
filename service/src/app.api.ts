@@ -1,3 +1,8 @@
+// Copyright (c) 2026 Daniel Stodulski
+// SPDX-License-Identifier: MIT
+// See the LICENSE file in the project root for license information.
+
+
 import { Injectable } from '@nestjs/common';
 
 import * as crypto from 'crypto';

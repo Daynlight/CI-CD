@@ -1,0 +1,11 @@
+TODO:
+- [ ] Docs
+- [ ] Tests
+- [ ] Edge cases
+- [ ] Releases
+- [ ] Github
+- [ ] Actions Template
+- [ ] Branches
+- [ ] Review
+- [ ] Spread Servers
+- [x] License
