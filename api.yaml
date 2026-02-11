@@ -70,4 +70,4 @@ jobs:
             -H "X-Repo: ${{ github.event.repository.name }}" \
             -H "X-Body: $TIMESTAMP" \
             -H "X-Sig-body: $SIGNATURE" \
-            "$URL"
+            "$URL/api/service/"
