@@ -136,7 +136,7 @@ sudo rm -rf /etc/ci-cd/CI-CD
    3. **[Optionally]** Set waiting for other workflows.
 
 ### Server
-To **setup server** you have to **edit**: ```/etc/ci-cd-config/services.json```
+To **setup server** you have to **edit**: ```/etc/ci-cd/services.json```
 ```json
 [
   {
