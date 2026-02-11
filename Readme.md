@@ -82,7 +82,6 @@ User=ci-cd
 Group=ci-cd
 WorkingDirectory=/etc/ci-cd/CI-CD/service
 ExecStart=/usr/bin/node /etc/ci-cd/CI-CD/service/dist/main.js
-Restart=on-failure
 Environment=NODE_ENV=production
 NoNewPrivileges=true
 PrivateTmp=true
@@ -92,7 +91,6 @@ ReadWritePaths=/etc/ci-cd/services
 CapabilityBoundingSet=
 RestrictSUIDSGID=true
 LockPersonality=true
-MemoryDenyWriteExecute=true
 Restart=on-failure
 RestartSec=5
 
