@@ -38,17 +38,19 @@
 ### ----------------------------------
 ### Settings directories and ownership
 ### ----------------------------------
-#### Create /etc/ci-cd/ and /etc/ci-cd/services 
+#### Create /etc/ci-cd/, /etc/ci-cd/services and /etc/ci-cd-config
 sudo mkdir -p /etc/ci-cd/
 sudo mkdir -p /etc/ci-cd/services
+sudo mkdir -p /etc/ci-cd-config
 
 #### Create user ci-cd for app
 sudo useradd -r -s /bin/false ci-cd || echo "User ci-cd already exists"
 
-#### Set owner and permission for /etc/ci-cd/ and /etc/ci-cd/services
+#### Set owner and permission for /etc/ci-cd/, /etc/ci-cd/services and /etc/ci-cd-config
 sudo chown -R ci-cd:ci-cd /etc/ci-cd/
 sudo chmod 750 /etc/ci-cd/
 sudo chmod 750 /etc/ci-cd/services/
+sudo chmod 750 /etc/ci-cd-config
 
 
 ### ----------------------------------
