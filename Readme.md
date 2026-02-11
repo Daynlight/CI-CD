@@ -47,23 +47,21 @@ sudo useradd -r -s /bin/false ci-cd || echo "User ci-cd already exists"
 
 #### Set owner and permission for /etc/ci-cd/ and /etc/ci-cd/services
 sudo chown -R ci-cd:ci-cd /etc/ci-cd/
-sudo chown -R ci-cd:ci-cd /etc/ci-cd/services/
 sudo chmod 750 /etc/ci-cd/
-sudo chmod 750 /etc/ci-cd/services/
-
+sudo chmod -R go-rwx /etc/ci-cd/
 
 ### ----------------------------------
 ### Server files installation
 ### ----------------------------------
 #### Clone repository to /etc/ci-cd/
-sudo -u ci-cd git clone -b server https://github.com/Daynlight/CI-CD /etc/ci-cd/CI-CD
+sudo -u ci-cd git clone --depth 1 -b server https://github.com/Daynlight/CI-CD /etc/ci-cd/CI-CD
 
 ### ---------
 ### Build app
 ### ---------
 #### Install nodejs and npm
 sudo apt update
-sudo apt install nodejs npm
+sudo apt install -y --no-install-recommends nodejs npm
 
 #### Build app
 sudo npm install --prefix /etc/ci-cd/CI-CD/service/
@@ -86,6 +84,17 @@ WorkingDirectory=/etc/ci-cd/CI-CD/service
 ExecStart=/usr/bin/node /etc/ci-cd/CI-CD/service/dist/main.js
 Restart=on-failure
 Environment=NODE_ENV=production
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/etc/ci-cd/services
+CapabilityBoundingSet=
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+Restart=on-failure
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
@@ -113,14 +122,14 @@ sudo systemctl disable ci-cd.service || echo "Service already disabled"
 ### ----------------------
 ### Remove systemd service file
 ### ----------------------
-sudo rm -f /etc/systemd/system/ci-cd.service
+sudo rm -f -- /etc/systemd/system/ci-cd.service
 sudo systemctl daemon-reload
 sudo systemctl reset-failed
 
 ### ----------------------
 ### Remove CI-CD server files
 ### ----------------------
-sudo rm -rf /etc/ci-cd/CI-CD
+sudo rm -rf -- /etc/ci-cd/CI-CD
 ```
 
 
