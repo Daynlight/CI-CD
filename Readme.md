@@ -48,6 +48,8 @@ sudo useradd -r -s /bin/false ci-cd || echo "User ci-cd already exists"
 
 #### Set owner and permission for /etc/ci-cd/, /etc/ci-cd/services and /etc/ci-cd-config
 sudo chown -R ci-cd:ci-cd /etc/ci-cd/
+sudo chown -R ci-cd:ci-cd /etc/ci-cd/services/
+sudo chown -R ci-cd:ci-cd /etc/ci-cd-config
 sudo chmod 750 /etc/ci-cd/
 sudo chmod 750 /etc/ci-cd/services/
 sudo chmod 750 /etc/ci-cd-config
