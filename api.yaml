@@ -4,16 +4,13 @@
 
 
 
-name: CI-CD-API
-
-
-
-env:
-  URL: # [!REQUIRED][set endpoint for api]
+# [!REQUIRED][set secret CI_CD_URL with your endpoint]
 # [!REQUIRED][set secret PRIVATE_KEY with your signature private key]
+# [!REQUIRED][set your production branch]
+# [!OPTIONAL][Set your others workflows]
 
 
-
+name: CI-CD-API
 on:
   push:
     branches:
@@ -40,11 +37,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up private key
         run: |
-          echo "${{ secrets.PRIVATE_KEY }}" > private.pem
+          echo "${{ secrets.CI_CD_PRIVATE_KEY }}" > private.pem
           chmod 600 private.pem
 
       - name: Generate timestamp and canonical string
@@ -58,16 +55,24 @@ jobs:
       - name: Sign request
         id: sign
         run: |
-          SIGNATURE=$(printf "$CANONICAL" \
+          SIGNATURE=$(printf "%s" "$CANONICAL" \
             | openssl dgst -sha256 -sign private.pem \
             | base64 -w 0)
           echo "SIGNATURE=$SIGNATURE" >> $GITHUB_ENV
 
       - name: Send request
         run: |
-          curl -v -k -f \
+          curl -sS -f \
+            --connect-timeout 10 \
+            --max-time 30 \
+            --retry 3 \
+            --retry-delay 5 \
             -H "X-Username: ${{ github.repository_owner }}" \
             -H "X-Repo: ${{ github.event.repository.name }}" \
             -H "X-Body: $TIMESTAMP" \
             -H "X-Sig-body: $SIGNATURE" \
-            "$URL/api/service/"
+            "${{ secrets.CI_CD_URL }}/api/service/"
+
+      - name: Cleanup private key
+        if: always()
+        run: rm -rf private.pem
