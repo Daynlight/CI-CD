@@ -8,8 +8,8 @@
 ## About
 **CI-CD** is a ```GitHub-based continuous integration and deployment workflow``` that allows you to **automatically deploy** your **applications on server**. It contain two modules:  
 
-1. **Server**: ```NestJS server backend on Server```.  
-2. **Service**: ```GitHub Repo with workflow```.
+1. **Server**: ```NestJS server running on your Server```.  
+2. **Service**: ```GitHub Repository with api workflow```.
 
 
 
@@ -131,9 +131,10 @@ sudo rm -rf /etc/ci-cd/CI-CD
 2. Provide ```Public.key``` for Servers.
 3. **[Optionally]** provide **start.sh**, **status.sh**, **stop.sh** scripts.
 4. Set github action with [api.yaml](https://github.com/Daynlight/CI-CD/blob/api_action/api.yaml)
-   1. Update **URL** to your endpoint.
-   2. Add **secret PRIVATE_KEY** for **signature** in github settings.
-   3. **[Optionally]** Set waiting for other workflows.
+   1. Add **secret CI_CD_URL** to your endpoint in github settings.
+   2. Add **secret CI_CD_PRIVATE_KEY** for **signature** in github settings.
+   3. Set **production branch**
+   4. **[Optionally]** Set waiting for other workflows.
 
 ### Server
 To **setup server** you have to **edit**: ```/etc/ci-cd/services.json```
@@ -149,7 +150,7 @@ To **setup server** you have to **edit**: ```/etc/ci-cd/services.json```
     "start": "start command",
     "status": "start command",
     "stop": "stop command"
-  },
+  }
 ]
 ```
 
@@ -166,7 +167,7 @@ To **setup server** you have to **edit**: ```/etc/ci-cd/services.json```
     "start": "/etc/ci-cd/services/Big-data-server/start.sh",  // or other bash command
     "status": "/etc/ci-cd/services/Big-data-server/status.sh",// or other bash command
     "stop": "/etc/ci-cd/services/Big-data-server/stop.sh"     // or other bash command
-  },
+  }
 ]
 ```
 Server after **file change automatically detect changes** than :
@@ -177,12 +178,13 @@ Server after **file change automatically detect changes** than :
 
 
 ## Security
-- It uses **keys pair** for ```encryption and decryption```. Server have access only to ```public.key``` and ```private.key``` is stored as **secret in repo**. 
+- It uses **keys pair** for ```request signing```. The server provides ```public.key``` and ```private.key``` is stored as **secret in repo**.
+- ```Endpoint url``` is stored as **secret in repo**.
 - When **API is called** than workflow create ```private.pem``` on **vm** and **send request** after that **vm is destroyed** so ```private.key``` is safe. 
 - **[!! Warning !!]**: take care about **not committing** and **printing** ```private.key``` in workflow.
 - Server works on **http** to use **https** edit ```src/main.ts``` and add **cert** and **key**.
 - **Ideal scenario** is using ```cloudflare``` for **tunneling** and **request isolation**.
-- On server before **restarting** and **updating** we check **last commit** and **current commit**.
+- On server before **restarting** and **updating** we compare **last commit** and **current commit**.
 
 
 
