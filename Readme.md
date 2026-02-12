@@ -95,6 +95,9 @@ RestrictSUIDSGID=true
 LockPersonality=true
 Restart=on-failure
 RestartSec=5
+MemoryMax=300M
+CPUQuota=50%
+TasksMax=100
 
 [Install]
 WantedBy=multi-user.target

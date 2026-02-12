@@ -53,7 +53,7 @@ export class ApiServices {
 
     const publicKey = fs.readFileSync(pathToPubKey, 'utf-8');
 
-    const canonical = `GET\n${body}\n-`;
+    const canonical = `${body}`;
 
     const verify = crypto.createVerify('RSA-SHA256');
     verify.update(canonical);
