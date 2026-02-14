@@ -20,7 +20,7 @@ import { ApiServices } from './app.api';
 
 
 
-@Controller('api/service')
+@Controller()
 export class AppController {
   constructor(private readonly apiService: ApiServices) {}
 
