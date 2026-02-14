@@ -4,10 +4,15 @@
 
 
 
-# [!REQUIRED][set secret CI_CD_URL with your endpoint]
-# [!REQUIRED][set secret PRIVATE_KEY with your signature private key]
+# [!REQUIRED][set Environment secret CI_CD_URL with your endpoint]
+# [!REQUIRED][set Environment secret CI_CD_PRIVATE_KEY with your signature private key]
 # [!REQUIRED][set your production branch]
 # [!OPTIONAL][Set your others workflows]
+
+
+
+permissions:
+  contents: read
 
 
 
@@ -32,6 +37,8 @@ on:
 
 jobs:
   ci-cd-api:
+    environment: production
+    
     if: ${{ github.event_name != 'workflow_run' || 
             github.event.workflow_run.conclusion == 'success' }}
 
@@ -49,7 +56,7 @@ jobs:
         id: generate
         run: |
           TIMESTAMP=$(date +%s)
-          CANONICAL="GET\n${TIMESTAMP}\n-"
+          CANONICAL="${TIMESTAMP}"
           echo "CANONICAL=$CANONICAL" >> $GITHUB_ENV
           echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV
 
@@ -59,7 +66,7 @@ jobs:
           SIGNATURE=$(printf "%s" "$CANONICAL" \
             | openssl dgst -sha256 -sign private.pem \
             | base64 -w 0)
-          echo "SIGNATURE=$SIGNATURE" >> $GITHUB_ENV
+          echo "SIGNATURE=$SIGNATURE" >> $GITHUB_ENV  
 
       - name: Send request
         run: |
@@ -72,7 +79,7 @@ jobs:
             -H "X-Repo: ${{ github.event.repository.name }}" \
             -H "X-Body: $TIMESTAMP" \
             -H "X-Sig-body: $SIGNATURE" \
-            "${{ secrets.CI_CD_URL }}/api/service/"
+            "${{ secrets.CI_CD_URL }}"
 
       - name: Cleanup private key
         if: always()
