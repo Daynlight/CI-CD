@@ -65,6 +65,7 @@ sudo useradd -r -s /bin/false ci-cd || echo "User ci-cd already exists"
 sudo chown -R ci-cd:ci-cd /etc/ci-cd/
 sudo chown -R root:ci-cd /etc/ci-cd/scripts/
 sudo chmod -R 700 /etc/ci-cd/
+sudo chmod -R 750 /etc/ci-cd/scripts/
 
 ### ----------------------------------
 ### Server files installation
