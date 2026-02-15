@@ -258,6 +258,7 @@ openssl rsa -pubout -in private.pem -out public.pem
 - Keep **one keys pair** by repository.
 - Server works on **http** to use **https** edit ```src/main.ts``` and add **cert** and **key**.
 - Use ```cloudflare``` for **tunneling**, **TLS** and hiding **global static IP**.
+- Set ```scripts``` to **chmod 750** and **chown root:ci-cd**
 
 
 
