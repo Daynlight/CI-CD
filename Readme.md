@@ -1,6 +1,6 @@
 <div align=center>
 
-# CI-CD
+# 🐙 CI-CD 🐙
 
 [![wakatime](https://wakatime.com/badge/user/233b40bd-5512-4e3e-9573-916f7b4127c3/project/66f964e6-e9e8-4a1b-bca9-feaa0615cf17.svg)](https://wakatime.com/badge/user/233b40bd-5512-4e3e-9573-916f7b4127c3/project/66f964e6-e9e8-4a1b-bca9-feaa0615cf17)
 </div>
