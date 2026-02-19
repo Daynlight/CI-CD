@@ -102,7 +102,6 @@ Environment=NODE_ENV=production
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
-ProtectHome=true
 ReadWritePaths=/etc/ci-cd/services
 CapabilityBoundingSet=
 RestrictSUIDSGID=true
